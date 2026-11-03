@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayo Belajar Membandingkan Panjang & Berat!</title>
+    <!-- Font Edukasi Anak -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --dark: #2C3E50;
+            --light: #F7F9FC;
+            --success: #2ECC71;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Fredoka', cursive, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #E0F7FA;
+            color: var(--dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        /* Container Aplikasi */
+        .app-container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 4px solid var(--secondary);
+            position: relative;
+        }
+
+        /* Header Navigation */
+        header {
+            background-color: var(--secondary);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .nav-btn {
+            background: var(--accent);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: bold;
+            color: var(--dark);
+            cursor: pointer;
+            box-shadow: 0 4px 0 #D4AC0D;
+            transition: 0.2s;
+        }
+
+        .nav-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none;
+            padding: 25px;
+            text-align: center;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Elements Styling */
+        h1 { color: var(--primary); margin-bottom: 15px; font-size: 2rem; }
+        h2 { color: var(--secondary); margin-bottom: 15px; }
+        p { font-size: 1.2rem; line-height: 1.5; margin-bottom: 15px; }
+
+        .btn-large {
+            background-color: var(--primary);
+            color: white;
+            font-size: 1.5rem;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #C0392B;
+            margin-top: 15px;
+            transition: 0.2s;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .btn-large:active {
+            transform: translateY(6px);
+            box-shadow: none;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label { font-size: 1.1rem; font-weight: bold; }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 3px solid var(--secondary);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            margin-top: 5px;
+        }
+
+        /* Visual & Card Display */
+        .comparison-box {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: var(--light);
+            padding: 20px;
+            border-radius: 16px;
+            margin: 20px 0;
+        }
+
+        .item-card {
+            border: 3px dashed var(--secondary);
+            padding: 15px;
+            border-radius: 16px;
+            background: white;
+            width: 45%;
+        }
+
+        .item-card img, .svg-icon {
+            max-width: 100%;
+            height: 100px;
+            object-fit: contain;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .opt-btn {
+            background: var(--light);
+            border: 3px solid var(--secondary);
+            padding: 15px;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .opt-btn:hover { background: var(--accent); }
+
+        /* Feedback Modal/Popup */
+        .feedback {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-top: 15px;
+            min-height: 30px;
+        }
+
+        .correct { color: var(--success); }
+        .wrong { color: var(--primary); }
+
+        /* Table Guru */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th { background-color: var(--secondary); color: white; }
+
+        /* Confetti Canvas */
+        #canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 99;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <canvas id="canvas"></canvas>
+    
+    <!-- HEADER -->
+    <header>
+        <span id="user-display">Halo, Teman Kecil!</span>
+        <button class="nav-btn" onclick="showScreen('screen-menu')">🏠 Menu</button>
+    </header>
+
+    <!-- 1. HALAMAN PEMBUKA -->
+    <div id="screen-welcome" class="screen active">
+        <h1>Ayo Belajar Membandingkan Panjang & Berat! 📏⚖️</h1>
+        <div style="font-size: 80px;">✏️ ⚖️ 📚</div>
+        <p>Mari belajar matematika dengan cara yang seru dan mudah!</p>
+        
+        <div style="max-width: 300px; margin: 0 auto;">
+            <div class="form-group">
+                <label for="student-name">Nama Lengkap:</label>
+                <input type="text" id="student-name" placeholder="Isi namamu di sini...">
+            </div>
+            <div class="form-group">
+                <label for="student-class">Kelas:</label>
+                <input type="text" id="student-class" value="1 SD" readonly>
+            </div>
+            <button class="btn-large" onclick="startApp()">Mulai Belajar!</button>
+        </div>
+    </div>
+
+    <!-- MENU UTAMA -->
+    <div id="screen-menu" class="screen">
+        <h2>Pilih Kegiatan Pembelajaran</h2>
+        <div class="options-grid" style="grid-template-columns: 1fr 1fr;">
+            <button class="opt-btn" onclick="showScreen('screen-petunjuk')">📖 Petunjuk</button>
+            <button class="opt-btn" onclick="showScreen('screen-materi')">📚 Belajar Materi</button>
+            <button class="opt-btn" onclick="showScreen('screen-interaktif')">💡 Praktik Langsung</button>
+            <button class="opt-btn" onclick="startQuiz()">📝 Kuis Seru</button>
+            <button class="opt-btn" onclick="showScreen('screen-guru')" style="grid-column: span 2; background: #E8DAEF;">👩‍🏫 Menu Guru / Hasil</button>
+        </div>
+    </div>
+
+    <!-- 2. PETUNJUK -->
+    <div id="screen-petunjuk" class="screen">
+        <h2>Cara Menggunakan Media 💡</h2>
+        <div style="text-align: left; background: var(--light); padding: 15px; border-radius: 12px;">
+            <p>1. Tekan tombol <b>Belajar Materi</b> untuk memahami konsep.</p>
+            <p>2. Tekan tombol <b>Praktik Langsung</b> untuk mencoba menjawab soal latihan.</p>
+            <p>3. Ambil benda-benda nyata di kelasmu (pensil, buku, penghapus) jika diminta mempraktikkan.</p>
+            <p>4. Selesaikan <b>Kuis Seru</b> untuk mendapat nilai hebat!</p>
+        </div>
+        <button class="btn-large" onclick="showScreen('screen-menu')">Saya Mengerti!</button>
+    </div>
+
+    <!-- 3. MATERI -->
+    <div id="screen-materi" class="screen">
+        <h2>Materi Pembelajaran 📚</h2>
+        <div class="comparison-box">
+            <div style="text-align: left;">
+                <h3>1. Membandingkan Panjang 📏</h3>
+                <p>• <b>Lebih Panjang</b>: Ukuran ujung ke ujung lebih besar.</p>
+                <p>• <b>Lebih Pendek</b>: Ukuran ujung ke ujung lebih kecil.</p>
+                <p>• <b>Sama Panjang</b>: Ukurannya persis sama.</p>
+            </div>
+        </div>
+        <div class="comparison-box">
+            <div style="text-align: left;">
+                <h3>2. Membandingkan Berat ⚖️</h3>
+                <p>• <b>Lebih Berat</b>: Terasa lebih berat saat diangkat / timbangan turun.</p>
+                <p>• <b>Lebih Ringan</b>: Terasa lebih ringan / timbangan naik.</p>
+                <p>• <b>Sama Berat</b>: Seimbang saat ditimbang.</p>
+            </div>
+        </div>
+        <button class="btn-large" onclick="showScreen('screen-interaktif')">Lanjut Praktik!</button>
+    </div>
+
+    <!-- 4. KEGIATAN INTERAKTIF & PERMAINAN -->
+    <div id="screen-interaktif" class="screen">
+        <h2>Kegiatan Interaktif 🎮</h2>
+        <p id="interactive-instruction">Perhatikan kedua benda di bawah ini!</p>
+        
+        <div class="comparison-box">
+            <div class="item-card">
+                <div id="itemA-icon" style="font-size: 50px;">✏️</div>
+                <p id="itemA-label">Pensil A</p>
+            </div>
+            <div style="font-size: 2rem; font-weight: bold;">VS</div>
+            <div class="item-card">
+                <div id="itemB-icon" style="font-size: 30px;">✏️</div>
+                <p id="itemB-label">Pensil B</p>
+            </div>
+        </div>
+
+        <p id="interactive-question">Pensil A ......... dibanding Pensil B</p>
+        <div class="options-grid" id="interactive-options">
+            <!-- Pilihan Jawaban via JS -->
+        </div>
+        <div id="interactive-feedback" class="feedback"></div>
+        <button class="btn-large" id="btn-next-interactive" style="display:none;" onclick="loadNextInteractive()">Soal Berikutnya ➔</button>
+    </div>
+
+    <!-- 5. KUIS -->
+    <div id="screen-kuis" class="screen">
+        <h2 id="quiz-progress">Kuis Soal 1 dari 10</h2>
+        <div class="comparison-box">
+            <div class="item-card">
+                <div id="quiz-itemA-icon" style="font-size: 50px;">📚</div>
+                <p id="quiz-itemA-label">Buku</p>
+            </div>
+            <div style="font-size: 2rem; font-weight: bold;">VS</div>
+            <div class="item-card">
+                <div id="quiz-itemB-icon" style="font-size: 40px;">🧹</div>
+                <p id="quiz-itemB-label">Penghapus</p>
+            </div>
+        </div>
+        <p id="quiz-question" style="font-size: 1.3rem; font-weight: bold;">Buku .......... daripada Penghapus.</p>
+        <div class="options-grid" id="quiz-options"></div>
+    </div>
+
+    <!-- 6. HASIL BELAJAR -->
+    <div id="screen-hasil" class="screen">
+        <h2>Hasil Belajar Kamu 🎉</h2>
+        <div style="background: var(--light); padding: 20px; border-radius: 16px; margin-bottom: 15px;">
+            <p>Nama: <b id="res-name">-</b></p>
+            <p>Kelas: <b id="res-class">-</b></p>
+            <h1 id="res-score" style="font-size: 4rem; color: var(--primary);">0</h1>
+            <p>Jawaban Benar: <b id="res-correct">0</b> | Salah: <b id="res-wrong">0</b></p>
+            <p id="res-status" style="font-size: 1.3rem; font-weight: bold; margin-top: 10px;"></p>
+        </div>
+        <button class="btn-large" onclick="saveToGoogleSheets()" id="btn-save">💾 Simpan Hasil Belajar</button>
+        <p id="save-status" style="margin-top:10px; font-weight:bold;"></p>
+    </div>
+
+    <!-- 7. MENU GURU -->
+    <div id="screen-guru" class="screen">
+        <h2>Menu Guru & Rekapitulasi 👩‍🏫</h2>
+        <div style="margin-bottom: 15px;">
+            <label for="web-app-url">Konfigurasi URL Google Apps Script Web App:</label>
+            <input type="text" id="web-app-url" placeholder="https://script.google.com/macros/s/.../exec">
+            <button class="nav-btn" style="margin-top: 5px; width: 100%;" onclick="saveConfig()">Simpan URL</button>
+        </div>
+        <h3>Rekap Hasil Belajar (Lokal)</h3>
+        <div style="overflow-x:auto;">
+            <table id="rekap-table">
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Kelas</th>
+                        <th>Nilai</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <button class="btn-large" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>
+    </div>
+</div>
+
+<script>
+/* ==========================================
+ * KONFIGURASI GLOBAL & STATE
+ * ========================================== */
+let studentInfo = { name: '', class: '' };
+let quizIndex = 0;
+let quizScore = 0;
+let correctAnswersCount = 0;
+let wrongAnswersCount = 0;
+
+// URL Web App GAS Default (Dapat diganti via Menu Guru)
+let scriptUrl = localStorage.getItem('scriptUrl') || "";
+
+/* ==========================================
+ * DATA SOAL INTERAKTIF & KUIS
+ * ========================================== */
+const interactiveData = [
+    {
+        itemA: { label: "Pensil A", icon: "✏️", size: "70px" },
+        itemB: { label: "Pensil B", icon: "✏️", size: "40px" },
+        question: "Pensil A ......... dibanding Pensil B",
+        options: ["Lebih panjang", "Lebih pendek", "Sama panjang"],
+        answer: "Lebih panjang"
+    },
+    {
+        itemA: { label: "Buku", icon: "📚", size: "60px" },
+        itemB: { label: "Penghapus", icon: "🧹", size: "40px" },
+        question: "Buku ......... dibanding Penghapus",
+        options: ["Lebih berat", "Lebih ringan", "Sama berat"],
+        answer: "Lebih berat"
+    }
+];
+
+const quizData = [
+    { itemA: { label: "Penggaris A (30cm)", icon: "📏", size: "70px" }, itemB: { label: "Penggaris B (15cm)", icon: "📏", size: "40px" }, q: "Penggaris A ........... Penggaris B", opts: ["Lebih panjang", "Lebih pendek", "Sama panjang"], ans: "Lebih panjang" },
+    { itemA: { label: "Pita Merah", icon: "🎀", size: "40px" }, itemB: { label: "Pita Biru", icon: "🎀", size: "70px" }, q: "Pita Merah ........... Pita Biru", opts: ["Lebih panjang", "Lebih pendek", "Sama panjang"], ans: "Lebih pendek" },
+    { itemA: { label: "Krayon A", icon: "🖍️", size: "50px" }, itemB: { label: "Krayon B", icon: "🖍️", size: "50px" }, q: "Krayon A ........... Krayon B", opts: ["Lebih panjang", "Lebih pendek", "Sama panjang"], ans: "Sama panjang" },
+    { itemA: { label: "Bola Basket", icon: "🏀", size: "60px" }, itemB: { label: "Spons", icon: "🧽", size: "50px" }, q: "Bola Basket ........... Spons", opts: ["Lebih berat", "Lebih ringan", "Sama berat"], ans: "Lebih berat" },
+    { itemA: { label: "Kapas", icon: "☁️", size: "50px" }, itemB: { label: "Batu", icon: "🪨", size: "50px" }, q: "Kapas ........... Batu", opts: ["Lebih berat", "Lebih ringan", "Sama berat"], ans: "Lebih ringan" },
+    { itemA: { label: "Pensil", icon: "✏️", size: "50px" }, itemB: { label: "Spidol", icon: "🖊️", size: "50px" }, q: "Ukuran panjang Pensil dan Spidol ini adalah...", opts: ["Lebih panjang", "Lebih pendek", "Sama panjang"], ans: "Sama panjang" },
+    { itemA: { label: "Meja Guru", icon: "🪑", size: "70px" }, itemB: { label: "Kursi Siswa", icon: "🪑", size: "40px" }, q: "Meja Guru ........... Kursi Siswa", opts: ["Lebih berat", "Lebih ringan", "Sama berat"], ans: "Lebih berat" },
+    { itemA: { label: "Kertas", icon: "📄", size: "50px" }, itemB: { label: "Buku Paket", icon: "📖", size: "60px" }, q: "Kertas ........... Buku Paket", opts: ["Lebih berat", "Lebih ringan", "Sama berat"], ans: "Lebih ringan" },
+    { itemA: { label: "Rautan", icon: "⚙️", size: "40px" }, itemB: { label: "Tas Sekolah", icon: "🎒", size: "70px" }, q: "Rautan ........... Tas Sekolah", opts: ["Lebih panjang", "Lebih pendek", "Sama panjang"], ans: "Lebih pendek" },
+    { itemA: { label: "Botol Terisi", icon: "🍾", size: "60px" }, itemB: { label: "Botol Kosong", icon: "🍾", size: "60px" }, q: "Botol Terisi Air ........... Botol Kosong", opts: ["Lebih berat", "Lebih ringan", "Sama berat"], ans: "Lebih berat" }
+];
+
+/* ==========================================
+ * NAVIGASI HALAMAN
+ * ========================================== */
+function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    
+    if (screenId === 'screen-interaktif') loadInteractive(0);
+    if (screenId === 'screen-guru') renderLocalTable();
+}
+
+function startApp() {
+    const name = document.getElementById('student-name').value;
+    if(!name) { alert('Isi namamu dulu ya, Teman!'); return; }
+    studentInfo.name = name;
+    studentInfo.class = document.getElementById('student-class').value;
+    document.getElementById('user-display').innerText = `Halo, ${name}!`;
+    showScreen('screen-menu');
+}
+
+/* ==========================================
+ * LOGIKA INTERAKTIF
+ * ========================================== */
+let currentInteractive = 0;
+function loadInteractive(idx) {
+    currentInteractive = idx;
+    const data = interactiveData[idx];
+    document.getElementById('itemA-icon').innerText = data.itemA.icon;
+    document.getElementById('itemA-icon').style.fontSize = data.itemA.size;
+    document.getElementById('itemA-label').innerText = data.itemA.label;
+    
+    document.getElementById('itemB-icon').innerText = data.itemB.icon;
+    document.getElementById('itemB-icon').style.fontSize = data.itemB.size;
+    document.getElementById('itemB-label').innerText = data.itemB.label;
+    
+    document.getElementById('interactive-question').innerText = data.question;
+    document.getElementById('interactive-feedback').innerText = '';
+    document.getElementById('btn-next-interactive').style.display = 'none';
+
+    const optsContainer = document.getElementById('interactive-options');
+    optsContainer.innerHTML = '';
+    data.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.innerText = opt;
+        btn.onclick = () => checkInteractive(opt, data.answer);
+        optsContainer.appendChild(btn);
+    });
+}
+
+function checkInteractive(selected, correct) {
+    const fb = document.getElementById('interactive-feedback');
+    if(selected === correct) {
+        fb.className = "feedback correct";
+        fb.innerText = "🎉 Hebat! Jawabanmu benar!";
+        document.getElementById('btn-next-interactive').style.display = 'inline-block';
+    } else {
+        fb.className = "feedback wrong";
+        fb.innerText = "❌ Coba lagi ya, perhatikan ukurannya!";
+    }
+}
+
+function loadNextInteractive() {
+    if(currentInteractive + 1 < interactiveData.length) {
+        loadInteractive(currentInteractive + 1);
+    } else {
+        showScreen('screen-materi');
+    }
+}
+
+/* ==========================================
+ * LOGIKA KUIS
+ * ========================================== */
+function startQuiz() {
+    quizIndex = 0;
+    quizScore = 0;
+    correctAnswersCount = 0;
+    wrongAnswersCount = 0;
+    showScreen('screen-kuis');
+    loadQuizQuestion();
+}
+
+function loadQuizQuestion() {
+    if(quizIndex >= quizData.length) {
+        finishQuiz();
+        return;
+    }
+    const q = quizData[quizIndex];
+    document.getElementById('quiz-progress').innerText = `Soal ${quizIndex + 1} dari ${quizData.length}`;
+    
+    document.getElementById('quiz-itemA-icon').innerText = q.itemA.icon;
+    document.getElementById('quiz-itemA-icon').style.fontSize = q.itemA.size;
+    document.getElementById('quiz-itemA-label').innerText = q.itemA.label;
+    
+    document.getElementById('quiz-itemB-icon').innerText = q.itemB.icon;
+    document.getElementById('quiz-itemB-icon').style.fontSize = q.itemB.size;
+    document.getElementById('quiz-itemB-label').innerText = q.itemB.label;
+    
+    document.getElementById('quiz-question').innerText = q.q;
+
+    const optsContainer = document.getElementById('quiz-options');
+    optsContainer.innerHTML = '';
+    q.opts.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.innerText = opt;
+        btn.onclick = () => handleQuizAnswer(opt, q.ans);
+        optsContainer.appendChild(btn);
+    });
+}
+
+function handleQuizAnswer(selected, correct) {
+    if(selected === correct) {
+        quizScore += 10;
+        correctAnswersCount++;
+    } else {
+        wrongAnswersCount++;
+    }
+    quizIndex++;
+    loadQuizQuestion();
+}
+
+function finishQuiz() {
+    showScreen('screen-hasil');
+    document.getElementById('res-name').innerText = studentInfo.name;
+    document.getElementById('res-class').innerText = studentInfo.class;
+    document.getElementById('res-score').innerText = quizScore;
+    document.getElementById('res-correct').innerText = correctAnswersCount;
+    document.getElementById('res-wrong').innerText = wrongAnswersCount;
+
+    const statusEl = document.getElementById('res-status');
+    if(quizScore >= 70) {
+        statusEl.innerText = "TUNTAS! 🎉 Kamu Luar Biasa!";
+        statusEl.style.color = "var(--success)";
+    } else {
+        statusEl.innerText = "PERLU BELAJAR LAGI 📚 Semangat, ya!";
+        statusEl.style.color = "var(--primary)";
+    }
+
+    // Simpan ke Rekap Lokal
+    saveLocalResult();
+}
+
+/* ==========================================
+ * INTEGRASI LOCAL STORAGE & GOOGLE SPREADSHEET
+ * ========================================== */
+function saveLocalResult() {
+    let history = JSON.parse(localStorage.getItem('math_results') || '[]');
+    history.push({
+        name: studentInfo.name,
+        class: studentInfo.class,
+        score: quizScore,
+        status: quizScore >= 70 ? 'Tuntas' : 'Perlu Belajar'
+    });
+    localStorage.setItem('math_results', JSON.stringify(history));
+}
+
+function renderLocalTable() {
+    const history = JSON.parse(localStorage.getItem('math_results') || '[]');
+    const tbody = document.querySelector('#rekap-table tbody');
+    tbody.innerHTML = '';
+    history.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${item.name}</td><td>${item.class}</td><td>${item.score}</td><td>${item.status}</td>`;
+        tbody.appendChild(tr);
+    });
+    document.getElementById('web-app-url').value = scriptUrl;
+}
+
+function saveConfig() {
+    scriptUrl = document.getElementById('web-app-url').value;
+    localStorage.setItem('scriptUrl', scriptUrl);
+    alert('URL Google Apps Script Berhasil Disimpan!');
+}
+
+function saveToGoogleSheets() {
+    if(!scriptUrl) {
+        alert('URL Google Apps Script belum dikonfigurasi di Menu Guru!');
+        return;
+    }
+
+    const btn = document.getElementById('btn-save');
+    const status = document.getElementById('save-status');
+    btn.disabled = true;
+    status.innerText = "Mengirim data...";
+
+    const payload = {
+        name: studentInfo.name,
+        class: studentInfo.class,
+        score: quizScore,
+        correct: correctAnswersCount,
+        wrong: wrongAnswersCount,
+        status: quizScore >= 70 ? 'Tuntas' : 'Perlu Belajar'
+    };
+
+    fetch(scriptUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(() => {
+        status.innerText = "✅ Data berhasil disimpan ke Google Sheets & Dokumen!";
+        status.style.color = "var(--success)";
+        btn.disabled = false;
